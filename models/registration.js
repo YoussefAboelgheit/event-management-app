@@ -3,7 +3,7 @@ import { Schema, model } from 'mongoose';
 const registrationSchema = new Schema({
     event_id: {
         type: Schema.Types.ObjectId,
-        ref: 'event',
+        ref: 'Event',
         required: [true, 'Event is required'],
     },
     user_id: {

@@ -30,6 +30,16 @@ const eventSchema = new Schema({
         ref: 'user',
         required: [true, 'User is required'],
     }
+}, {
+    toJSON: {
+        transform: function (doc, ret) {
+            if (ret.date) {
+                // Return only the YYYY-MM-DD portion
+                ret.date = ret.date.toISOString().split('T')[0];
+            }
+            return ret;
+        }
+    }
 });
 
 export default model('Event', eventSchema);
