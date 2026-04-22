@@ -2,12 +2,19 @@ import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export const createUser = async (req, res) => {
-  const salt = await bcrypt.genSalt(10);
-  req.body.password = await bcrypt.hash(req.body.password, salt);
-  const user = await User.create(req.body);
-  user.password = undefined; // Hide passenger on return
-  res.status(201).json(user);
+export const createUser = async (req, res, next) => {
+  try {
+    const salt = await bcrypt.genSalt(10);
+    req.body.password = await bcrypt.hash(req.body.password, salt);
+    const user = await User.create(req.body);
+    user.password = undefined; // Hide passenger on return
+    res.status(201).json(user);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Email is already registered" });
+    }
+    next(error);
+  }
 };
 
 export const loginUser = async (req, res) => {

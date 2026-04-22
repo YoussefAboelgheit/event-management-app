@@ -22,25 +22,10 @@ export const createRegistration = async (req, res) => {
 };
 
 export const getRegistrations = async (req, res) => {
-  // 1. Find all events created by the logged-in user
-  const userEvents = await Event.find({ user_id: req.user.userId }).select("_id");
-  const eventObjectIds = userEvents.map(e => e._id); // Keep as ObjectId for Mongoose querying
-  const eventIdsStrings = eventObjectIds.map(id => id.toString());
-
-  const { event_id } = req.query;
-
-  // If a specific event is requested, ensure the user created it
-  if (event_id && !eventIdsStrings.includes(event_id)) {
-    return res.status(403).json({ message: "You are not authorized to view registrations for this event" });
-  }
-
-  // 2. Fetch registrations only for those events (or the specific one)
-  const filter = { event_id: event_id ? event_id : { $in: eventObjectIds } };
-
-  const registrations = await Registration.find(filter)
+  // Fetch registrations where the logged in user is the attendee
+  const registrations = await Registration.find({ user_id: req.user.userId })
     .populate("event_id")
-    .populate("user_id") // This populates the registered user's details
-    .sort({ createdAt: -1 });
+    .populate("user_id");
     
   res.json(registrations);
 };
